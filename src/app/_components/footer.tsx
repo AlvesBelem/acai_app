@@ -16,7 +16,7 @@ export function Footer() {
                         <p className='mb-1'>Quer ser remunerado pelo seu resíduo?</p>
                         <p className='mb-4'>fale com a gente!</p>
                         <a
-                            href={`https://wa.me/5591992572999?text=Olá! Pet Shop Dev, gostaria de saber mais sobre os serviços oferecidos.`}
+                            href={`https://wa.me/5591992572999?text=Olá! Olá, vi no site sobre o serviço de coleta do caroço do açaí e gostaria de mais informações.`}
                             target="_blank"
                             className="bg-green-700 px-5 py-2 rounded-md font-semibold flex items-center justify-center w-fit gap-2"
                         >
