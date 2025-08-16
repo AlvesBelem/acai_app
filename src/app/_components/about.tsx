@@ -62,7 +62,7 @@ export function About() {
 
                         <div className="flex gap-2">
                             <a
-                                href={`https://wa.me/5591992572999?text=Olá! Pet Shop Dev, gostaria de saber mais sobre os serviços oferecidos.`}
+                                href={`https://wa.me/5591992572999?text=Olá! Olá, vi no site sobre o serviço de coleta do caroço do açaí e gostaria de mais informações.`}
                                 target="_blank"
                                 className="bg-[#620F83] text-white flex items-center justify-center w-fit gap-2 px-4 py-2 rounded-md"
                             >

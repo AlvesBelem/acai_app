@@ -30,7 +30,7 @@ export function Hero() {
                         </p>
                         <a
                             data-aos="flip-left" data-aos-delay="2500"
-                            href={`https://wa.me/5591992572999?text=Olá! Pet Shop Dev, gostaria de saber mais sobre os serviços oferecidos.`}
+                            href={`https://wa.me/5591992572999?text=Olá! Olá, vi no site sobre o serviço de coleta do caroço do açaí e gostaria de mais informações.`}
                             target="_blank"
                             className="bg-green-500 px-5 py-2 rounded-md font-semibold flex items-center justify-center w-fit gap-2 mx-auto lg:mx-0"
                         >
