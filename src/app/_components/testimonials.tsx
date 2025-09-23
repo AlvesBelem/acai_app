@@ -2,8 +2,8 @@
 "use client"
 
 import useEmblaCarousel from 'embla-carousel-react'
-import { ChevronLeft, ChevronRight, Scissors, Syringe, CarTaxiFront, Hotel, Clock } from 'lucide-react'
-import { WhatsappLogoIcon } from '@phosphor-icons/react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Container } from './container'
 import tutor1 from '../../../public/imagens/tutor1.png'
 import tutor2 from '../../../public/imagens/tutor2.jpg'
 import Image from 'next/image'
@@ -13,20 +13,20 @@ const testimonials = [
         content:
             "Antes eu tinha que pagar para alguém recolher o caroço do açaí. Agora, além de economizar, ainda ganho uma renda extra todo mês. O serviço é rápido e super confiável!",
         author: "Mariana Souza",
-        role: "Logista de açaí",
+        role: "Lojista de açaí",
         image: tutor2,
     },
     {
         content:
             "O recolhimento é sempre pontual e a equipe é muito profissional. Saber que o resíduo é reciclado de forma correta me deixa tranquilo e ainda ajuda o meio ambiente.",
         author: "Rafael",
-        role: "Logista de açaí",
+        role: "Lojista de açaí",
         image: tutor1,
     },
     {
-        content: "Facilitou demais o meu dia a dia! O contato pelo WhatsApp é prático, e o processo não tem burocracia. Recomendo para todos os lojistas da região.",
-        author: "Camila fernandes",
-        role: "Logista de açaí",
+        content: "Facilitou demais o meu dia a dia! O contato pelo WhatsApp é prático e o processo não tem burocracia. Recomendo para todos os lojistas da região.",
+        author: "Camila Fernandes",
+        role: "Lojista de açaí",
         image: tutor2,
     },
 ]
@@ -47,10 +47,10 @@ export function Testimonials() {
     }
 
     return (
-        <section className="bg-[#FFD449] py-16">
-            <div className="container mx-auto px-4">
+        <section className="bg-[var(--brand-secondary)] py-16">
+            <Container>
 
-                <h2 data-aos="fade-up-left" data-aos-delay="5000" className="text-4xl font-bold text-center mb-12">Depoimentos</h2>
+                <h2 data-aos="fade-up-left" data-aos-delay="5000" className="text-3xl md:text-4xl font-bold text-center mb-12">Depoimentos</h2>
 
                 <div className="relative max-w-4xl mx-auto">
 
@@ -90,22 +90,23 @@ export function Testimonials() {
 
                     <button
                         data-aos="fade-up-left" data-aos-delay="5500"
-                        className='bg-white flex items-center justify-center rounded-full shadow-lg w-10 h-10 absolute left-3 -translate-y-1/2 -translate-x-1/2 top-1/2 z-10'
+                        className='bg-white flex items-center justify-center rounded-full shadow-lg w-8 h-8 md:w-10 md:h-10 absolute -left-1 md:-left-5 top-1/2 -translate-y-1/2 z-20'
                         onClick={scrollPrev}
                     >
-                        <ChevronLeft className='w-6 h-6 text-gray-600' />
+                        <ChevronLeft className='w-5 h-5 md:w-6 md:h-6 text-gray-600' />
                     </button>
 
                     <button
-                        className='bg-white flex items-center justify-center rounded-full shadow-lg w-10 h-10 absolute -right-6 -translate-y-1/2 -translate-x-1/2 top-1/2 z-10'
+                        data-aos="fade-up-left" data-aos-delay="5500"
+                        className='bg-white flex items-center justify-center rounded-full shadow-lg w-8 h-8 md:w-10 md:h-10 absolute -right-1 md:-right-5 top-1/2 -translate-y-1/2 z-20'
                         onClick={scrollNext}
                     >
-                        <ChevronRight className='w-6 h-6 text-gray-600' />
+                        <ChevronRight className='w-5 h-5 md:w-6 md:h-6 text-gray-600' />
                     </button>
 
                 </div>
 
-            </div>
+            </Container>
         </section>
     )
 }

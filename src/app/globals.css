@@ -44,6 +44,10 @@
 }
 
 :root {
+  /* Brand palette (tweak to match logo) */
+  --brand-primary: #4B0D65; /* Açaí roxo */
+  --brand-secondary: #83ad6c; /* Verde da logo */
+  --brand-cream: #FDF6EC; /* Fundo claro */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

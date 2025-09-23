@@ -1,131 +1,156 @@
-"use client"
+"use client";
 
-import useEmblaCarousel from 'embla-carousel-react'
-import { ChevronLeft, ChevronRight, User, Truck, BanknoteArrowUp, CirclePlus, Clock } from 'lucide-react'
-import { WhatsappLogoIcon } from '@phosphor-icons/react'
+import { User, Truck, BanknoteArrowUp, CirclePlus, Clock, UserPlus, Recycle } from 'lucide-react';
+import { Container } from './container';
 
 const services = [
   {
-    title: "O logista",
-    description: "O lojista bate o açaí e separa o caroço, que é o resíduo do açaí. Ele pode armazenar o caroço em sacos ou recipientes adequados.",
-    duration: "1h",
-    price: "$50",
+    title: "O lojista",
+    description: "Você separa o caroço (resíduo do açaí) em sacos ou recipientes. Quanto mais limpo e seco, melhor.",
+    duration: "Etapa 1",
     icon: <User />,
-    linkText: 'Olá, vi no site sobre o serviço de coleta do caroço do açaí e gostaria de mais informações.'
   },
   {
     title: "Nós recolhemos o caroço",
-    description: "Nós recolhemos o caroço do açaí do lojista, garantindo que o resíduo seja descartado de forma adequada e sustentável.",
-    duration: "1h",
-    price: "$45",
+    description: "Agendamos a coleta no seu endereço e retiramos o material com agilidade e responsabilidade.",
+    duration: "Etapa 2",
     icon: <Truck />,
-    linkText: 'Olá, vi no site sobre o serviço de coleta do caroço do açaí e gostaria de mais informações.'
   },
   {
-    title: "Ele recebe uma pagamento pelo resíduo",
-    description: "O lojista recebe um pagamento pelo resíduo do açaí, incentivando a prática sustentável e a economia circular.",
-    duration: "2h",
-    price: "$80",
+    title: "Pagamento justo no ato",
+    description: "Você recebe pelo resíduo do açaí. Simples, rápido e sem burocracia.",
+    duration: "Etapa 3",
     icon: <BanknoteArrowUp />,
-    linkText: 'Olá, vi no site sobre o serviço de coleta do caroço do açaí e gostaria de mais informações.'
   },
   {
-    title: "Comparativo visual:",
-    description: "Antes: lojista paga para recolher. Depois: lojista recebe pelo resíduo.",
-    duration: "1h",
-    price: "$60",
+    title: "Comparativo visual",
+    description: "Antes: pagar para alguém recolher. Depois: receber pelo seu resíduo.",
+    duration: "Comparativo",
     icon: <CirclePlus />,
-    linkText: 'Olá, vi no site sobre o serviço de coleta do caroço do açaí e gostaria de mais informações.'
   },
-]
+];
 
 export function Services() {
-
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: false,
-    align: "start",
-    slidesToScroll: 1,
-    breakpoints: {
-      "(min-width: 768px)": { slidesToScroll: 3 }
-    }
-  })
-
-
-  function scrollPrev() {
-    emblaApi?.scrollPrev();
-  }
-
-  function scrollNext() {
-    emblaApi?.scrollNext();
-  }
-
   return (
-    <section className="bg-white py-16">
-      <div className="container mx-auto px-4">
+    <>
+      <section className="bg-[var(--brand-primary)] py-16">
+        <Container>
+          <h2 data-aos="fade-up-left" data-aos-delay="4500" className="text-center text-[var(--brand-cream)] text-3xl md:text-4xl font-bold mb-12">
+            Como funciona
+          </h2>
 
-        <h2 data-aos="fade-up-left" data-aos-delay="4500" className="text-4xl font-bold mb-12">Como funciona</h2>
-
-        <div className="relative">
-
-          <div data-aos="fade-up-left" data-aos-delay="4500" className='overflow-hidden' ref={emblaRef}>
-            <div className='flex'>
-              {services.map((item, index) => (
-                <div key={index} className="flex-[0_0_100%] min-w-0 md:flex-[0_0_calc(100%/3)] px-3">
-                  <article className="bg-[#620F83] text-white rounded-2xl p-6 space-y-4 h-full flex flex-col">
-                    <div className='flex-1 flex items-start justify-between'>
-
-                      <div className='flex gap-3'>
-                        <span className='text-3xl'>{item.icon}</span>
-                        <div>
-                          <h3 className='font-bold text-xl my-1'>{item.title}</h3>
-                          <p className='text-gray-400 text-sm select-none'>
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-
-                    </div>
-
-                    <div className='border-t border-gray-700 pt-4 flex items-center justify-between'>
-                      <div className='flex items-center gap-2 text-sm'>
-                        <Clock className='w-4 h-4' />
-                        <span>{item.duration}</span>
-                      </div>
-
-                      <a
-                        target='_blank'
-                        href={`https://wa.me/5591992572999?text=Olá vim pelo site e gostaria de mais informações sbore ${item.title}`}
-                        className='flex items-center justify-center gap-2 hover:bg-green-700 px-4 py-1 rounded-md duration-300'
-                      >
-                        <WhatsappLogoIcon className='w-5 h-5' />
-                        Entrar em contato
-                      </a>
-
-                    </div>
-
-                  </article>
+          <div data-aos="fade-up-left" data-aos-delay="4600" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((item, index) => (
+              <article key={index} className="bg-[var(--brand-cream)] text-[var(--brand-primary)] rounded-2xl p-6 space-y-4 h-full flex flex-col">
+                <div className="flex-1 flex items-start gap-3">
+                  <span className="text-3xl">{item.icon}</span>
+                  <div>
+                    <h3 className="font-bold text-xl my-1">{item.title}</h3>
+                    <p className="text-sm">{item.description}</p>
+                  </div>
                 </div>
-              ))}
+                <div className="border-t border-black/10 pt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4" />
+                    <span>{item.duration}</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+
+        </Container>
+      </section>
+
+      <section className="py-16 bg-[var(--brand-primary)]">
+        <Container>
+          <h2 className="text-[var(--brand-cream)] text-3xl md:text-4xl font-bold mb-10 text-center">
+            Fluxo do serviço
+          </h2>
+
+          <div className="mx-auto max-w-3xl">
+            <div className="relative aspect-square">
+              <svg viewBox="0 0 200 200" className="w-full h-full">
+                <defs>
+                  <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="var(--brand-primary)" />
+                    <stop offset="100%" stopColor="var(--brand-secondary)" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="78"
+                  fill="none"
+                  stroke="url(#grad)"
+                  strokeWidth="2"
+                  strokeDasharray="6 6"
+                  className="[animation:dashMove_12s_linear_infinite]"
+                />
+                <style>{`@keyframes dashMove { to { stroke-dashoffset: -60; } }`}</style>
+              </svg>
+
+              {/* Etapas visuais do fluxo */}
+              <Node step={1} x="50%" y="6%" label="Você separa o caroço" Icon={User} />
+              <Node step={2} x="94%" y="50%" label="Coletamos no endereço" Icon={Truck} align="right" />
+              <Node step={3} x="50%" y="94%" label="Pagamento no ato" Icon={BanknoteArrowUp} />
+              <Node step={4} x="6%" y="50%" label="Destino correto do resíduo" Icon={Recycle} align="left" />
+
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-sm text-gray-500">Como funciona</p>
+                  <p className="text-xl font-semibold text-[color:var(--brand-primary)]">
+                    Ciclo simples e sustentável
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <button
-            className='bg-white flex items-center justify-center rounded-full shadow-lg w-10 h-10 absolute left-3 -translate-y-1/2 -translate-x-1/2 top-1/2 z-10'
-            onClick={scrollPrev}
+          <div
+            className="mt-8 flex justify-center"
+            data-aos="fade-up"
+            data-aos-delay="700"
           >
-            <ChevronLeft className='w-6 h-6 text-gray-600' />
-          </button>
+            <a
+              href="/login"
+              className="px-6 py-2 rounded-md bg-[var(--brand-cream)] text-[var(--brand-primary)] hover:opacity-90"
+            >
+              Acessar plataforma
+            </a>
+          </div>
+        </Container>
+      </section>
+    </>
+  );
 
-          <button
-            className='bg-white flex items-center justify-center rounded-full shadow-lg w-10 h-10 absolute -right-6 -translate-y-1/2 -translate-x-1/2 top-1/2 z-10'
-            onClick={scrollNext}
-          >
-            <ChevronRight className='w-6 h-6 text-gray-600' />
-          </button>
-
-        </div>
-
+  function Node({
+    step,
+    x,
+    y,
+    label,
+    Icon,
+    align,
+  }: {
+    step: number;
+    x: string;
+    y: string;
+    label: string;
+    Icon: any;
+    align?: "left" | "right";
+  }) {
+    return (
+      <div
+        className="absolute flex items-center gap-2"
+        style={{ left: x, top: y, transform: "translate(-50%, -50%)" }}
+      >
+        {align === "left" ? null : <Icon className="w-5 h-5 text-[color:var(--brand-primary)]" />}
+        <span className="bg-[var(--brand-cream)] border border-black/5 text-[color:var(--brand-primary)] text-xs md:text-sm px-2 py-1 rounded-md shadow-sm whitespace-nowrap">
+          <strong>Passo {step}</strong>: {label}
+        </span>
+        {align === "left" ? <Icon className="w-5 h-5 text-[color:var(--brand-primary)]" /> : null}
       </div>
-    </section>
-  )
+    );
+  }
 }
