@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "../_components/container";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function LoginPage() {
   const params = useSearchParams();
@@ -12,6 +12,7 @@ export default function LoginPage() {
 
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingCadastro, setLoadingCadastro] = useState(false);
+  const [verifyLink, setVerifyLink] = useState<string | null>(null);
   const router = useRouter();
 
   async function onLogin(e: React.FormEvent<HTMLFormElement>) {
@@ -41,7 +42,14 @@ export default function LoginPage() {
     const name = (form.querySelector('#cnome') as HTMLInputElement).value;
     const email = (form.querySelector('#cemail') as HTMLInputElement).value;
     const phone = (form.querySelector('#ctelefone') as HTMLInputElement).value;
-    const password = (form.querySelector('#cpass') as HTMLInputElement)?.value || Math.random().toString(36).slice(2,10);
+    const password = (form.querySelector('#cpass') as HTMLInputElement)?.value || '';
+
+    if (!password || password.length < 6) {
+      setLoadingCadastro(false);
+      alert('Informe uma senha com no mínimo 6 caracteres.');
+      return;
+    }
+
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -49,12 +57,30 @@ export default function LoginPage() {
     });
     setLoadingCadastro(false);
     if (res.ok) {
-      alert('Cadastro criado! Faça login.');
+      const data = await res.json().catch(() => ({}));
+      if (data.verificationUrl) {
+        setVerifyLink(data.verificationUrl);
+        alert('Cadastro criado! Verifique seu email.');
+      } else {
+        const loginRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        if (loginRes.ok) router.push('/plataforma');
+        else alert((await loginRes.json().catch(() => ({}))).error ?? 'Conta criada, mas não foi possível entrar.');
+      }
     } else {
       const data = await res.json().catch(() => ({}));
       alert(data.error ?? 'Não foi possível cadastrar');
     }
   }
+
+  useEffect(() => {
+    if (params.get('verified') === '1') {
+      alert('Email verificado com sucesso! Agora você pode entrar.');
+    }
+  }, [params]);
 
   return (
     <section className="py-16">
@@ -99,7 +125,8 @@ export default function LoginPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1" htmlFor="cpass">Senha</label>
-                  <input id="cpass" type="password" required className="w-full rounded-md border px-3 py-2" placeholder="Crie uma senha" />
+                  <input id="cpass" type="password" required className="w-full rounded-md border px-3 py-2" placeholder="Mínimo 6 caracteres" />
+                  <p className="text-xs text-gray-500 mt-1">Sua conta será criada e você poderá acessar a plataforma.</p>
                 </div>
                 <Button type="submit" disabled={loadingCadastro} className="w-full">{loadingCadastro ? "Enviando..." : "Criar conta"}</Button>
               </form>

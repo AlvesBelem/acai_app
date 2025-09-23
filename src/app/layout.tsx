@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AosInit } from "./_components/aos-init";
+import Script from "next/script";
 import { FloatingWhatsApp } from "./_components/floating-whatsapp";
 
 const geistSans = Geist({
@@ -35,6 +36,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+            try {
+              var saved = localStorage.getItem('theme');
+              var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+              var isDark = saved ? (saved === 'dark') : prefersDark;
+              if (isDark) document.documentElement.classList.add('dark');
+              else document.documentElement.classList.remove('dark');
+            } catch (e) {}
+          `}
+        </Script>
         {children}
         <FloatingWhatsApp />
         <AosInit />

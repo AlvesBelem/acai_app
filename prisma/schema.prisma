@@ -7,15 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  LEAD
+}
+
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
   name         String?
   phone        String?
   passwordHash String
+  emailVerified DateTime?
+  verificationToken String?
+  verificationExpires DateTime?
+  role         UserRole @default(LEAD)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   sessions     Session[]
+  lead         Lead?
+  marketingLeads MarketingLead[]
 }
 
 model Session {
@@ -27,3 +38,35 @@ model Session {
   createdAt    DateTime @default(now())
 }
 
+model MarketingLead {
+  id        String   @id @default(cuid())
+  name      String?
+  phone     String?
+  email     String   @unique
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("Lead")
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  source    String?
+  status    String?  @default("Novo")
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@map("UserLead")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  priceCents  Int      @default(0)
+  createdAt   DateTime @default(now())
+}

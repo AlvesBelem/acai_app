@@ -1,47 +1,46 @@
-import { Container } from "../_components/container";
 import { Button } from "@/components/ui/button";
+import { PlatformHeader } from "../_components/platform-header";
+import { PlatformShell } from "../_components/platform-shell";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function PlataformaPage() {
   const session = await getSession();
-  if (!session) redirect("/login");
+  const cookieStore = await cookies();
+  const leadCookie = cookieStore.get('lead_id')?.value ?? null;
+  if (!session && !leadCookie) redirect("/login");
   const HOTMART_URL = "https://app.hotmart.com";
 
+  let role: 'ADMIN' | 'LEAD' = 'LEAD';
+  let user: { name?: string|null, email?: string|null } | undefined = undefined;
+  if (session) {
+    const rows = (await prisma.$queryRaw`SELECT name, email, role FROM "User" WHERE id = ${session.userId} LIMIT 1`) as { name: string|null, email: string, role: 'ADMIN' | 'LEAD' }[];
+    const row = rows[0];
+    if (row) {
+      user = { name: row.name, email: row.email };
+      role = row.role;
+    }
+  }
+  type LeadRow = { id: string; name: string | null; phone: string | null; email: string; createdAt: string };
+  // Garante coluna archivedAt para bancos antigos
+  if (role === 'ADMIN') {
+    await prisma.$executeRaw`ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "archivedAt" timestamp NULL`;
+  }
+  const leads = role === 'ADMIN'
+    ? ((await prisma.$queryRaw`SELECT id, name, phone, email, "createdAt" FROM "Lead" WHERE "archivedAt" IS NULL ORDER BY "createdAt" DESC LIMIT 200`) as LeadRow[])
+    : [];
+
+  type ProductRow = { id: string; name: string; description: string | null; priceCents: number; createdAt: string };
+  const products = (await prisma.$queryRaw`SELECT id, name, description, "priceCents", "createdAt" FROM "Product" ORDER BY "createdAt" DESC LIMIT 200`) as ProductRow[];
+
   return (
-    <section className="py-16">
-      <Container>
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-3">Plataforma</h1>
-          <p className="text-gray-700 mb-8">Cadastre leads e acesse ofertas de listas de fornecedores hospedadas na Hotmart.</p>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl border bg-white p-6">
-              <h2 className="font-semibold text-lg mb-2">Registrar Leads</h2>
-              <p className="text-gray-600 mb-4">Recurso em implementação. Em breve você poderá criar e gerenciar seus leads.</p>
-              <div className="flex gap-2">
-                <Button asChild>
-                  <a href="/cadastro">Criar conta</a>
-                </Button>
-                <Button asChild variant="outline">
-                  <a href="/login">Entrar</a>
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-xl border bg-white p-6">
-              <h2 className="font-semibold text-lg mb-2">Listas na Hotmart</h2>
-              <p className="text-gray-600 mb-4">Acesse as ofertas e realize a compra diretamente na Hotmart com segurança.</p>
-              <Button asChild className="bg-[#620F83] hover:bg-[#620F83]/90">
-                <a href={HOTMART_URL} target="_blank" rel="noopener noreferrer">Ver ofertas na Hotmart</a>
-              </Button>
-            </div>
-          </div>
-          <form action="/api/auth/logout" method="post" className="mt-8">
-            <Button type="submit" variant="outline">Sair</Button>
-          </form>
-        </div>
-      </Container>
-    </section>
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+      <div className="max-w-7xl mx-auto p-6">
+        <PlatformHeader user={user} />
+        <PlatformShell role={role} initialLeads={leads} initialProducts={products} />
+      </div>
+    </div>
   );
 }
