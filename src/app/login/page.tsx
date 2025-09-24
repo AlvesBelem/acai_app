@@ -2,22 +2,20 @@
 
 export const dynamic = "force-dynamic";
 
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Container } from "../_components/container";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
   const params = useSearchParams();
   const router = useRouter();
 
   const [tab, setTab] = useState("login");
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingCadastro, setLoadingCadastro] = useState(false);
-  const [verifyLink, setVerifyLink] = useState<string | null>(null);
 
-  // Define a aba inicial baseado no ?tab=cadastro
   useEffect(() => {
     if (params.get("tab") === "cadastro") {
       setTab("cadastro");
@@ -78,7 +76,6 @@ export default function LoginPage() {
     if (res.ok) {
       const data = await res.json().catch(() => ({}));
       if (data.verificationUrl) {
-        setVerifyLink(data.verificationUrl);
         alert("Cadastro criado! Verifique seu email.");
       } else {
         const loginRes = await fetch("/api/auth/login", {
@@ -98,12 +95,6 @@ export default function LoginPage() {
       alert(data.error ?? "Não foi possível cadastrar");
     }
   }
-
-  useEffect(() => {
-    if (params.get("verified") === "1") {
-      alert("Email verificado com sucesso! Agora você pode entrar.");
-    }
-  }, [params]);
 
   return (
     <section className="py-16 bg-gray-100 min-h-screen flex items-center">
@@ -238,5 +229,13 @@ export default function LoginPage() {
         </div>
       </Container>
     </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

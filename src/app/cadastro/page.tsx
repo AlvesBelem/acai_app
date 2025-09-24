@@ -1,13 +1,12 @@
 "use client";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Container } from "../_components/container";
-import { useState } from "react";
 
-export default function CadastroPage() {
+function CadastroContent() {
   const [loading, setLoading] = useState(false);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -20,9 +19,9 @@ export default function CadastroPage() {
   }
 
   return (
-    <section className="py-16">
+    <section className="py-16 bg-gray-100 min-h-screen flex items-center">
       <Container>
-        <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6">
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6 text-gray-900">
           <h1 className="text-2xl font-bold mb-1">Criar conta</h1>
           <p className="text-gray-600 mb-6">
             Cadastre-se para registrar leads e acessar ofertas.
@@ -36,22 +35,19 @@ export default function CadastroPage() {
                 id="nome"
                 type="text"
                 required
-                className="w-full rounded-md border px-3 py-2"
+                className="w-full rounded-md border px-3 py-2 text-gray-900 placeholder-gray-400"
                 placeholder="Seu nome"
               />
             </div>
             <div>
-              <label
-                className="block text-sm font-medium mb-1"
-                htmlFor="email"
-              >
+              <label className="block text-sm font-medium mb-1" htmlFor="email">
                 Email
               </label>
               <input
                 id="email"
                 type="email"
                 required
-                className="w-full rounded-md border px-3 py-2"
+                className="w-full rounded-md border px-3 py-2 text-gray-900 placeholder-gray-400"
                 placeholder="voce@exemplo.com"
               />
             </div>
@@ -66,14 +62,14 @@ export default function CadastroPage() {
                 id="telefone"
                 type="tel"
                 required
-                className="w-full rounded-md border px-3 py-2"
+                className="w-full rounded-md border px-3 py-2 text-gray-900 placeholder-gray-400"
                 placeholder="(91) 9 9999-9999"
               />
             </div>
             <Button
               type="submit"
               disabled={loading}
-              className="w-full"
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
             >
               {loading ? "Enviando..." : "Criar conta"}
             </Button>
@@ -87,5 +83,13 @@ export default function CadastroPage() {
         </div>
       </Container>
     </section>
+  );
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <CadastroContent />
+    </Suspense>
   );
 }

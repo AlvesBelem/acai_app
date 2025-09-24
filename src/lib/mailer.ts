@@ -43,4 +43,3 @@ export async function sendVerificationEmail({ to, verificationUrl }: SendArgs) {
 
   await transport.sendMail({ to, from, subject: "Confirme seu e-mail", html });
 }
-

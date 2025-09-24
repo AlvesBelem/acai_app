@@ -14,6 +14,7 @@ export async function registerUser({
 }: { name?: string; email: string; phone?: string; password: string; role?: 'ADMIN' | 'LEAD' }) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new Error("Email já cadastrado");
+
   const hash = await bcrypt.hash(password, 10);
   const disableVerification =
     process.env.DISABLE_EMAIL_VERIFICATION === "true" || process.env.NODE_ENV !== "production";
@@ -37,11 +38,11 @@ export async function registerUser({
     });
 
     // define papel admin se solicitado
-    if (role === 'ADMIN') {
+    if (role === "ADMIN") {
       await tx.$executeRaw`update "User" set role = 'ADMIN'::"UserRole" where id = ${user.id}`;
     }
 
-    // upsert seguro em MarketingLead (tabela física "Lead") em duas etapas
+    // garante presença em Lead
     const marketingLeadId = crypto.randomUUID();
     await tx.$executeRaw`insert into "Lead" (id, email) values (${marketingLeadId}, ${email}) on conflict (email) do nothing`;
     await tx.$executeRaw`
@@ -52,10 +53,9 @@ export async function registerUser({
       where email = ${email}
     `;
 
-    // cria Lead 1:1 quando papel for LEAD (default)
+    // cria UserLead se papel for LEAD
     let leadId: string | null = null;
-    if ((role ?? 'LEAD') === 'LEAD') {
-      // gera id explícito pois a tabela não possui default de id no banco
+    if ((role ?? "LEAD") === "LEAD") {
       const newId = crypto.randomUUID();
       await tx.$executeRaw`insert into "UserLead" (id, "userId") values (${newId}, ${user.id}) on conflict ("userId") do nothing`;
       const row = (await tx.$queryRaw`select id from "UserLead" where "userId" = ${user.id} limit 1`) as { id: string }[];
@@ -65,26 +65,38 @@ export async function registerUser({
     return { user, leadId };
   });
 
-  return { user: result.user, lead: result.leadId ? { id: result.leadId } : null, verificationToken };
+  return {
+    user: result.user,
+    lead: result.leadId ? { id: result.leadId } : null,
+    verificationToken,
+    verificationUrl: verificationToken
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/verify?email=${encodeURIComponent(
+          email
+        )}&token=${verificationToken}`
+      : null,
+  };
 }
 
 export async function loginUser({ email, password }: { email: string; password: string }) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new Error("Credenciais inválidas");
+
   const disableVerification =
     process.env.DISABLE_EMAIL_VERIFICATION === "true" || process.env.NODE_ENV !== "production";
   if (!disableVerification && !user.emailVerified)
     throw new Error("Verifique seu email antes de entrar");
+
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("Credenciais inválidas");
 
   const token = crypto.randomUUID();
   const expires = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
+
   await prisma.session.create({
     data: { sessionToken: token, userId: user.id, expires },
   });
 
-  // Garante lead cadastrado em login (para contas antigas)
+  // garante lead atualizado
   const marketingLeadId = crypto.randomUUID();
   await prisma.$executeRaw`insert into "Lead" (id, email) values (${marketingLeadId}, ${email}) on conflict (email) do nothing`;
   await prisma.$executeRaw`
@@ -131,9 +143,46 @@ export async function verifyEmail({ email, token }: { email: string; token: stri
   if (user.emailVerified) return true;
   if (!user.verificationToken || user.verificationToken !== token) throw new Error("Token inválido");
   if (!user.verificationExpires || user.verificationExpires < new Date()) throw new Error("Token expirado");
+
   await prisma.user.update({
     where: { id: user.id },
     data: { emailVerified: new Date(), verificationToken: null, verificationExpires: null },
   });
+
   return true;
+}
+
+// 🔥 Novo: login automático sem senha, usado após verificação
+export async function loginUserByEmail(email: string) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error("Usuário não encontrado");
+
+  const token = crypto.randomUUID();
+  const expires = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
+
+  await prisma.session.create({
+    data: { sessionToken: token, userId: user.id, expires },
+  });
+
+  // garante lead atualizado
+  const marketingLeadId = crypto.randomUUID();
+  await prisma.$executeRaw`insert into "Lead" (id, email) values (${marketingLeadId}, ${email}) on conflict (email) do nothing`;
+  await prisma.$executeRaw`
+    update "Lead"
+    set name = coalesce(${user.name ?? null}, name),
+        phone = coalesce(${user.phone ?? null}, phone),
+        "userId" = coalesce(${user.id}, "userId")
+    where email = ${email}
+  `;
+
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    expires,
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  return { userId: user.id };
 }
