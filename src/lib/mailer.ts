@@ -12,7 +12,9 @@ function getTransport() {
   const pass = process.env.MAIL_PASS;
 
   if (!host || !port || !user || !pass) {
-    throw new Error("SMTP não configurado (defina MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS)");
+    throw new Error(
+      "SMTP não configurado (defina MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS)"
+    );
   }
 
   return nodemailer.createTransport({
@@ -26,12 +28,15 @@ function getTransport() {
 export async function sendVerificationEmail({ to, verificationUrl }: SendArgs) {
   const from = process.env.MAIL_FROM ?? `No-Reply <no-reply@localhost>`;
   const transport = getTransport();
+
   const html = `
-    <div style="font-family:Arial,sans-serif;line-height:1.4">
-      <h2>Confirme seu e-mail</h2>
-      <p>Obrigado por se cadastrar. Clique no botão abaixo para confirmar seu e-mail:</p>
+    <div style="font-family:Arial,sans-serif;line-height:1.5;color:#333">
+      <h2 style="color:#4B0D65">Confirme seu e-mail</h2>
+      <p>Obrigado por se cadastrar! Clique no botão abaixo para confirmar seu e-mail:</p>
       <p>
-        <a href="${verificationUrl}" style="display:inline-block;background:#4B0D65;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">
+        <a href="${verificationUrl}"
+           style="display:inline-block;background:#4B0D65;color:#fff;padding:10px 16px;
+                  border-radius:6px;text-decoration:none;font-weight:bold">
           Verificar e-mail
         </a>
       </p>
@@ -41,5 +46,10 @@ export async function sendVerificationEmail({ to, verificationUrl }: SendArgs) {
     </div>
   `;
 
-  await transport.sendMail({ to, from, subject: "Confirme seu e-mail", html });
+  await transport.sendMail({
+    to,
+    from,
+    subject: "Confirme seu e-mail",
+    html,
+  });
 }

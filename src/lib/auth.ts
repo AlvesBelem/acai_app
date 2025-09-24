@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const SESSION_COOKIE = "session";
@@ -23,26 +24,23 @@ export async function registerUser({
     ? null
     : new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
-  const result = await prisma.$transaction(async (tx) => {
-    // cria usuário
-    const user = await tx.user.create({
-      data: {
-        name,
-        email,
-        phone,
-        passwordHash: hash,
-        emailVerified: disableVerification ? new Date() : null,
-        verificationToken,
-        verificationExpires,
-      },
-    });
-
-    // define papel admin se solicitado
+  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  // agora tx está tipado
+  const user = await tx.user.create({
+    data: {
+      name,
+      email,
+      phone,
+      passwordHash: hash,
+      emailVerified: disableVerification ? new Date() : null,
+      verificationToken,
+      verificationExpires,
+    },
+  });
     if (role === "ADMIN") {
       await tx.$executeRaw`update "User" set role = 'ADMIN'::"UserRole" where id = ${user.id}`;
     }
 
-    // garante presença em Lead
     const marketingLeadId = crypto.randomUUID();
     await tx.$executeRaw`insert into "Lead" (id, email) values (${marketingLeadId}, ${email}) on conflict (email) do nothing`;
     await tx.$executeRaw`
@@ -53,7 +51,6 @@ export async function registerUser({
       where email = ${email}
     `;
 
-    // cria UserLead se papel for LEAD
     let leadId: string | null = null;
     if ((role ?? "LEAD") === "LEAD") {
       const newId = crypto.randomUUID();
@@ -96,7 +93,6 @@ export async function loginUser({ email, password }: { email: string; password: 
     data: { sessionToken: token, userId: user.id, expires },
   });
 
-  // garante lead atualizado
   const marketingLeadId = crypto.randomUUID();
   await prisma.$executeRaw`insert into "Lead" (id, email) values (${marketingLeadId}, ${email}) on conflict (email) do nothing`;
   await prisma.$executeRaw`
@@ -150,39 +146,4 @@ export async function verifyEmail({ email, token }: { email: string; token: stri
   });
 
   return true;
-}
-
-// 🔥 Novo: login automático sem senha, usado após verificação
-export async function loginUserByEmail(email: string) {
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("Usuário não encontrado");
-
-  const token = crypto.randomUUID();
-  const expires = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
-
-  await prisma.session.create({
-    data: { sessionToken: token, userId: user.id, expires },
-  });
-
-  // garante lead atualizado
-  const marketingLeadId = crypto.randomUUID();
-  await prisma.$executeRaw`insert into "Lead" (id, email) values (${marketingLeadId}, ${email}) on conflict (email) do nothing`;
-  await prisma.$executeRaw`
-    update "Lead"
-    set name = coalesce(${user.name ?? null}, name),
-        phone = coalesce(${user.phone ?? null}, phone),
-        "userId" = coalesce(${user.id}, "userId")
-    where email = ${email}
-  `;
-
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    expires,
-    secure: process.env.NODE_ENV === "production",
-  });
-
-  return { userId: user.id };
 }

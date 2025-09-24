@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyEmail, loginUserByEmail } from "@/lib/auth";
+import { verifyEmail } from "@/lib/auth";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -7,14 +7,13 @@ export async function GET(req: Request) {
   const token = searchParams.get("token");
 
   if (!email || !token) {
-    return NextResponse.json({ error: "Parâmetros ausentes" }, { status: 400 });
+    return NextResponse.redirect(new URL("/verificado?status=error", req.url));
   }
 
   try {
     await verifyEmail({ email, token });
-    await loginUserByEmail(email);
-    return NextResponse.redirect(new URL("/plataforma", req.url));
+    return NextResponse.redirect(new URL("/verificado?status=ok", req.url));
   } catch (e: any) {
-    return NextResponse.json({ error: e.message ?? "Falha na verificação" }, { status: 400 });
+    return NextResponse.redirect(new URL("/verificado?status=error", req.url));
   }
 }
