@@ -37,23 +37,23 @@ export function About() {
 
                     {/* Texto informativo */}
                     <div data-aos="fade-up-left" data-aos-delay="3000" className="space-y-6 mt-10">
-                        <h2 className="text-3xl md:text-4xl font-bold">Quem somos</h2>
+                        <h2 className="text-[var(--brand-primary)] text-3xl md:text-4xl font-bold">Quem somos</h2>
 
-                        <p>
+                        <p className="text-[var(--brand-primary)]">
                             Desde 2006, compramos e destinamos corretamente o caroço do açaí, gerando renda para quem produz e impacto positivo para o meio ambiente.
                             Você separa o resíduo; nós coletamos e pagamos de forma justa.
                         </p>
 
                         <ul className="space-y-4">
-                            <li className="flex items-center gap-2">
+                            <li className="text-[var(--brand-primary)] flex items-center gap-2">
                                 <CheckIcon className="text-red-500" />
                                 Pagamento no ato, sem enrolação
                             </li>
-                            <li className="flex items-center gap-2">
+                            <li className="text-[var(--brand-primary)] flex items-center gap-2">
                                 <CheckIcon className="text-red-500" />
                                 Coleta agendada direto no seu endereço
                             </li>
-                            <li className="flex items-center gap-2">
+                            <li className="text-[var(--brand-primary)] flex items-center gap-2">
                                 <CheckIcon className="text-red-500" />
                                 Destinação ambientalmente correta (economia circular)
                             </li>
@@ -70,9 +70,9 @@ export function About() {
                             <a
                                 href={`https://maps.app.goo.gl/pBeVFNWpGjH9Ad9o7`}
                                 target="_blank"
-                                className="text-black flex items-center justify-center w-fit gap-2 px-4 py-2 rounded-md"
+                                className="text-[var(--brand-primary)] flex items-center justify-center w-fit gap-2 px-4 py-2 rounded-md"
                             >
-                                <MapPinIcon className="text-black w-5 h-5" />
+                                <MapPinIcon className="text-[var(--brand-primary)]-black w-5 h-5" />
                                 Ver localização
                             </a>
                         </div>
