@@ -46,15 +46,15 @@ export function About() {
 
                         <ul className="space-y-4">
                             <li className="text-[var(--brand-primary)] flex items-center gap-2">
-                                <CheckIcon className="text-red-500" />
+                                <CheckIcon className="text-[var(--brand-primary)]" />
                                 Pagamento no ato, sem enrolação
                             </li>
                             <li className="text-[var(--brand-primary)] flex items-center gap-2">
-                                <CheckIcon className="text-red-500" />
+                                <CheckIcon className="text-[var(--brand-primary)]" />
                                 Coleta agendada direto no seu endereço
                             </li>
                             <li className="text-[var(--brand-primary)] flex items-center gap-2">
-                                <CheckIcon className="text-red-500" />
+                                <CheckIcon className="text-[var(--brand-primary)]" />
                                 Destinação ambientalmente correta (economia circular)
                             </li>
                         </ul>
