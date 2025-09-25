@@ -1,4 +1,5 @@
-// app/verificado/page.tsx
+export const dynamic = "force-dynamic"
+
 import { Suspense } from "react"
 import { VerificadoContent } from "./verificado-content"
 
