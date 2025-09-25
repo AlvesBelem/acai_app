@@ -12,7 +12,7 @@ export async function registerUser({
   phone,
   password,
   role,
-}: { name?: string; email: string; phone?: string; password: string; role?: 'ADMIN' | 'LEAD' }) {
+}: { name?: string; email: string; phone?: string; password: string; role?: "ADMIN" | "LEAD" }) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new Error("Email já cadastrado");
 
@@ -25,18 +25,18 @@ export async function registerUser({
     : new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
   const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-  // agora tx está tipado
-  const user = await tx.user.create({
-    data: {
-      name,
-      email,
-      phone,
-      passwordHash: hash,
-      emailVerified: disableVerification ? new Date() : null,
-      verificationToken,
-      verificationExpires,
-    },
-  });
+    const user = await tx.user.create({
+      data: {
+        name,
+        email,
+        phone,
+        passwordHash: hash,
+        emailVerified: disableVerification ? new Date() : null,
+        verificationToken,
+        verificationExpires,
+      },
+    });
+
     if (role === "ADMIN") {
       await tx.$executeRaw`update "User" set role = 'ADMIN'::"UserRole" where id = ${user.id}`;
     }
@@ -86,20 +86,31 @@ export async function loginUser({ email, password }: { email: string; password: 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("Credenciais inválidas");
 
+  return await createSession(user.id, email, user.name, user.phone);
+}
+
+export async function loginUserByEmail(email: string) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error("Usuário não encontrado");
+
+  return await createSession(user.id, email, user.name, user.phone);
+}
+
+async function createSession(userId: string, email: string, name?: string | null, phone?: string | null) {
   const token = crypto.randomUUID();
   const expires = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
 
   await prisma.session.create({
-    data: { sessionToken: token, userId: user.id, expires },
+    data: { sessionToken: token, userId, expires },
   });
 
   const marketingLeadId = crypto.randomUUID();
   await prisma.$executeRaw`insert into "Lead" (id, email) values (${marketingLeadId}, ${email}) on conflict (email) do nothing`;
   await prisma.$executeRaw`
     update "Lead"
-    set name = coalesce(${user.name ?? null}, name),
-        phone = coalesce(${user.phone ?? null}, phone),
-        "userId" = coalesce(${user.id}, "userId")
+    set name = coalesce(${name ?? null}, name),
+        phone = coalesce(${phone ?? null}, phone),
+        "userId" = coalesce(${userId}, "userId")
     where email = ${email}
   `;
 
@@ -112,7 +123,7 @@ export async function loginUser({ email, password }: { email: string; password: 
     secure: process.env.NODE_ENV === "production",
   });
 
-  return { userId: user.id };
+  return { userId };
 }
 
 export async function logoutUser() {

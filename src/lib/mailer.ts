@@ -12,15 +12,13 @@ function getTransport() {
   const pass = process.env.MAIL_PASS;
 
   if (!host || !port || !user || !pass) {
-    throw new Error(
-      "SMTP não configurado (defina MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS)"
-    );
+    throw new Error("SMTP não configurado (defina MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS)");
   }
 
   return nodemailer.createTransport({
     host,
     port,
-    secure: port === 465, // true para 465, false TLS para outros
+    secure: port === 465,
     auth: { user, pass },
   });
 }

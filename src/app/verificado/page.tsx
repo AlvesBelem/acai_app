@@ -1,8 +1,9 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function VerificadoPage() {
+function VerificadoContent() {
   const params = useSearchParams();
   const status = params.get("status");
 
@@ -13,18 +14,26 @@ export default function VerificadoPage() {
           <>
             <h1 className="text-2xl font-bold mb-2 text-green-600">✅ E-mail verificado!</h1>
             <p className="text-gray-700">
-              Seu e-mail foi confirmado com sucesso. Agora acesse a plataforma no seu computador e faça login.
+              Seu e-mail foi confirmado com sucesso. Agora você já pode fazer login.
             </p>
           </>
         ) : (
           <>
             <h1 className="text-2xl font-bold mb-2 text-red-600">❌ Erro na verificação</h1>
             <p className="text-gray-700">
-              O link é inválido ou expirou. Solicite um novo cadastro para continuar.
+              O link é inválido ou expirou. Solicite um novo cadastro.
             </p>
           </>
         )}
       </div>
     </div>
+  );
+}
+
+export default function VerificadoPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-center">Carregando...</div>}>
+      <VerificadoContent />
+    </Suspense>
   );
 }
