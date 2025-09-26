@@ -67,8 +67,11 @@ model Product {
   id          Int      @id @default(autoincrement())
   name        String
   description String
-  priceCents  Int      // 👈 aqui mudou de price para priceCents
+  priceCents  Int
   createdAt   DateTime @default(now())
+
+  imageUrl    String?  // ← novo campo
+  checkoutUrl String?  // ← novo campo
 }
 
 
