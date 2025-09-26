@@ -19,7 +19,7 @@ function CadastroContent() {
   }
 
   return (
-    <section className="py-16 bg-gray-100 min-h-screen flex items-center">
+    <section className="z-1100 py-16 bg-gray-100 min-h-screen flex items-center">
       <Container>
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6 text-gray-900">
           <h1 className="text-2xl font-bold mb-1">Criar conta</h1>

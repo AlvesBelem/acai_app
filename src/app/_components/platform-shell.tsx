@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Users, Package, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Package, ChevronLeft, ChevronRight, Plus, Pencil, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-type Lead = { id: string; name: string | null; phone: string | null; email: string; createdAt: string };
-type Product = { id: string; name: string; description?: string | null; priceCents: number; createdAt: string };
 
 export function PlatformShell({
   role,
@@ -15,38 +12,63 @@ export function PlatformShell({
   initialProducts,
 }: {
   role: "ADMIN" | "LEAD";
-  initialLeads: Lead[];
-  initialProducts: Product[];
+  initialLeads: any[];
+  initialProducts: any[];
 }) {
   const [active, setActive] = useState<"clientes" | "produtos">(() => (role === 'ADMIN' ? 'clientes' : 'produtos'));
-  const [leads, setLeads] = useState<Lead[]>(initialLeads);
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState(initialProducts);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<any | null>(null);
   const [collapsed, setCollapsed] = useState(true);
 
-  const canManage = role === "ADMIN";
+  const isAdmin = role === "ADMIN";
 
-  async function refreshLeads() {
-    const res = await fetch("/api/leads");
-    const data = await res.json().catch(() => ({ items: [] }));
-    setLeads(data.items ?? []);
-  }
-
-  async function refreshProducts() {
-    const res = await fetch("/api/products");
-    const data = await res.json().catch(() => ({ items: [] }));
-    setProducts(data.items ?? []);
-  }
+  const fetchProducts = async () => {
+    const res = await fetch("/api/produtos");
+    const data = await res.json();
+    setProducts(data.items);
+  };
 
   useEffect(() => {
-    if (canManage) {
-      refreshLeads();
-      refreshProducts();
-    }
+    fetchProducts();
   }, []);
+
+  const handleSave = async (e: any) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const body: any = {
+      name: form.get("name"),
+      description: form.get("description"),
+      priceCents: Math.round(parseFloat(form.get("price") as string) * 100),
+      imageUrl: form.get("imageUrl"),
+      checkoutUrl: form.get("checkoutUrl"),
+    };
+    if (editing) body["id"] = editing.id;
+
+    const res = await fetch("/api/produtos", {
+      method: editing ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      setShowForm(false);
+      setEditing(null);
+      fetchProducts();
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Excluir este produto?")) return;
+    await fetch("/api/produtos", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    fetchProducts();
+  };
 
   return (
     <div className="w-full">
-      {/* Botão "Menu" para mobile */}
       <div className="md:hidden flex justify-between items-center mb-4">
         <h1 className="text-xl font-semibold">Plataforma</h1>
         <button
@@ -59,7 +81,6 @@ export function PlatformShell({
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 items-start w-full relative">
-        {/* Sidebar mobile com framer-motion */}
         <AnimatePresence>
           {!collapsed && (
             <motion.aside
@@ -71,128 +92,81 @@ export function PlatformShell({
             >
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm font-semibold">Menu</p>
-                <button
-                  className="inline-flex items-center justify-center size-8 rounded-md border border-slate-300 dark:border-slate-700"
-                  onClick={() => setCollapsed(true)}
-                >
+                <button className="size-8 border rounded" onClick={() => setCollapsed(true)}>
                   <ChevronLeft className="w-4 h-4" />
                 </button>
               </div>
               <nav className="space-y-2">
-                {canManage && (
-                  <button
-                    className={cn(
-                      "w-full flex items-center gap-2 px-3 py-2 rounded-md transition-colors justify-start text-left",
-                      active === "clientes"
-                        ? "bg-slate-900 text-white dark:bg-slate-800"
-                        : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white"
-                    )}
-                    onClick={() => {
-                      setActive("clientes");
-                      setCollapsed(true);
-                    }}
-                  >
-                    <Users className="w-4 h-4" />
-                    <span>Clientes</span>
-                  </button>
-                )}
-                <button
-                  className={cn(
-                    "w-full flex items-center gap-2 px-3 py-2 rounded-md transition-colors justify-start text-left",
-                    active === "produtos"
-                      ? "bg-slate-900 text-white dark:bg-slate-800"
-                      : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white"
-                  )}
-                  onClick={() => {
-                    setActive("produtos");
-                    setCollapsed(true);
-                  }}
-                >
-                  <Package className="w-4 h-4" />
-                  <span>Produtos</span>
-                </button>
+                {isAdmin && <button onClick={() => setActive("clientes")}>Clientes</button>}
+                <button onClick={() => setActive("produtos")}>Produtos</button>
               </nav>
             </motion.aside>
           )}
         </AnimatePresence>
 
-        {/* Overlay escuro ao fundo */}
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
-              onClick={() => setCollapsed(true)}
-            />
-          )}
-        </AnimatePresence>
+        {!collapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setCollapsed(true)}
+          />
+        )}
 
-        {/* Sidebar desktop */}
-        <aside
-          className={cn(
-            "hidden md:block shrink-0 rounded-xl border p-3 sticky top-4 h-[88vh] overflow-hidden bg-white border-slate-200 dark:bg-slate-950/90 dark:border-slate-800",
-            collapsed ? "w-16" : "w-60"
-          )}
-        >
-          <div className={cn("flex items-center justify-between mb-3", collapsed && "justify-center")}
-          >
-            {!collapsed && (
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Menu</p>
-            )}
-            <button
-              type="button"
-              onClick={() => setCollapsed((v) => !v)}
-              title={collapsed ? "Abrir sidebar" : "Fechar sidebar"}
-              className="inline-flex items-center justify-center size-8 rounded-md border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            </button>
-          </div>
-          <nav className="space-y-2">
-            {canManage && (
-              <button
-                className={cn(
-                  "w-full flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
-                  collapsed ? "justify-center" : "justify-start text-left",
-                  active === "clientes"
-                    ? "bg-slate-900 text-white dark:bg-slate-800"
-                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white"
-                )}
-                onClick={() => setActive("clientes")}
-                aria-label="Clientes"
-                title="Clientes"
-              >
-                <Users className="w-4 h-4" />
-                {!collapsed && <span>Clientes</span>}
-              </button>
-            )}
-            <button
-              className={cn(
-                "w-full flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
-                collapsed ? "justify-center" : "justify-start text-left",
-                active === "produtos"
-                  ? "bg-slate-900 text-white dark:bg-slate-800"
-                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white"
-              )}
-              onClick={() => setActive("produtos")}
-              aria-label="Produtos"
-              title="Produtos"
-            >
-              <Package className="w-4 h-4" />
-              {!collapsed && <span>Produtos</span>}
-            </button>
-          </nav>
-        </aside>
+        <aside className={cn("hidden md:block w-64 shrink-0", "p-4 bg-white dark:bg-slate-900 border rounded-lg")}>Sidebar</aside>
 
-        {/* Conteúdo principal */}
         <main className="flex-1">
-          {active === "clientes" ? (
-            <div className="text-slate-800 dark:text-slate-200">Lista de clientes aqui...</div>
+          {active === "produtos" ? (
+            <div>
+              {isAdmin && (
+                <div className="mb-4">
+                  <Button onClick={() => { setEditing(null); setShowForm(true); }} className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" /> Novo Produto
+                  </Button>
+                </div>
+              )}
+
+              {showForm && (
+                <form onSubmit={handleSave} className="bg-white border p-4 rounded mb-6 space-y-3">
+                  <input name="name" defaultValue={editing?.name || ""} placeholder="Nome" className="w-full p-2 border rounded" required />
+                  <input name="description" defaultValue={editing?.description || ""} placeholder="Descrição" className="w-full p-2 border rounded" />
+                  <input name="price" defaultValue={editing ? (editing.priceCents / 100).toFixed(2) : ""} type="number" step="0.01" placeholder="Preço (R$)" className="w-full p-2 border rounded" required />
+                  <input name="imageUrl" defaultValue={editing?.imageUrl || ""} placeholder="URL da imagem" className="w-full p-2 border rounded" required />
+                  <input name="checkoutUrl" defaultValue={editing?.checkoutUrl || ""} placeholder="Link do checkout" className="w-full p-2 border rounded" required />
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditing(null); }}>Cancelar</Button>
+                    <Button type="submit">Salvar</Button>
+                  </div>
+                </form>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {products.map((p) => (
+                  <div key={p.id} className="border rounded p-4 shadow bg-white flex flex-col">
+                    <img src={p.imageUrl} alt={p.name} className="w-full h-40 object-cover rounded mb-2" />
+                    <h3 className="text-lg font-semibold">{p.name}</h3>
+                    <p className="text-sm text-slate-600">{p.description}</p>
+                    <p className="text-green-600 font-bold mt-1">R$ {(p.priceCents / 100).toFixed(2)}</p>
+                    <a href={p.checkoutUrl} target="_blank" className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm text-center">Comprar</a>
+
+                    {isAdmin && (
+                      <div className="flex justify-end gap-2 mt-4">
+                        <button onClick={() => { setEditing(p); setShowForm(true); }} className="p-2 border rounded hover:bg-slate-100">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(p.id)} className="p-2 border rounded hover:bg-slate-100">
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
-            <div className="text-slate-800 dark:text-slate-200">Lista de produtos aqui...</div>
+            <div className="text-slate-800 dark:text-slate-200">Lista de clientes aqui...</div>
           )}
         </main>
       </div>
