@@ -3,6 +3,8 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { PromoteButton } from "@/app/admin/promote-button";
 import { DeleteButton } from "@/app/admin/delete-button";
+import { LeadEditor } from "@/app/admin/lead-editor";
+
 
 
 export default async function AdminPage() {
@@ -52,11 +54,11 @@ export default async function AdminPage() {
                         </thead>
                         <tbody>
                             {users.map((u) => (
-                                <tr key={u.id} className="border-t border-neutral-700">
+                                <tr key={u.id} className=" border-t border-neutral-700">
                                     <td className="p-2">{u.name ?? "-"}</td>
                                     <td className="p-2">{u.email}</td>
-                                    
-                                    <td className="p-2">
+
+                                    <td className="p-2  ">
                                         {new Date(u.createdAt).toLocaleDateString("pt-BR")}
                                     </td>
                                     <td className="p-2">
@@ -78,14 +80,20 @@ export default async function AdminPage() {
             {/* Leads */}
             <section>
                 <h2 className="text-xl font-semibold mb-2">Últimos Leads</h2>
-                <ul className="space-y-2">
+                <ul className="space-y-4">
                     {leads.map((lead) => (
-                        <li key={lead.id} className="border p-2 rounded">
-                            {lead.source ?? "Sem origem"} – {lead.status ?? "Novo"}
+                        <li key={lead.id} className="border p-3 rounded bg-neutral-900">
+                            <p className="text-sm mb-2 text-neutral-300">Origem: {lead.source ?? "Sem origem"}</p>
+                            <LeadEditor
+                                id={lead.id}
+                                initialStatus={lead.status}
+                                initialNotes={lead.notes}
+                            />
                         </li>
                     ))}
                 </ul>
             </section>
+
 
             {/* Produtos */}
             <section>
