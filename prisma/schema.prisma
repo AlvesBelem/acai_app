@@ -64,11 +64,11 @@ model Lead {
 }
 
 model Product {
-  id           String   @id @default(cuid())
-  name         String
-  description  String?
-  priceCents   Int      @default(0)
-  imageUrl     String   // novo campo
-  checkoutUrl  String   // novo campo
-  createdAt    DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  priceCents  Int      // 👈 aqui mudou de price para priceCents
+  createdAt   DateTime @default(now())
 }
+
+

@@ -4,6 +4,7 @@ import "./globals.css";
 import { AosInit } from "./_components/aos-init";
 import Script from "next/script";
 import { FloatingWhatsApp } from "./_components/floating-whatsapp";
+import { Toaster } from "sonner"; // ✅ Toast
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950 text-white`}
       >
         <Script id="theme-init" strategy="beforeInteractive">
           {`
@@ -47,9 +48,11 @@ export default function RootLayout({
             } catch (e) {}
           `}
         </Script>
+
         {children}
         <FloatingWhatsApp />
         <AosInit />
+        <Toaster position="top-right" richColors /> {/* ✅ Toast visível */}
       </body>
     </html>
   );

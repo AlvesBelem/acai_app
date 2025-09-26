@@ -25,11 +25,11 @@ export function FloatingWhatsApp() {
   }, [])
 
   return (
-    <div className="fixed bottom-4 right-1 sm:right-4 z-999 flex items-end gap-2">
+    <div className="fixed bottom-4 right-4 z-[999] flex items-end gap-2 max-w-[90vw]">
       {/* Dica flutuante */}
       {showHint && (
-        <div className="sm:flex items-center bg-white text-[#2E2E2E] shadow-md rounded-xl px-3 py-2 max-w-xs">
-          <span className="text-sm">Tá com dúvida? Chama no Zap!</span>
+        <div className="bg-white text-[#2E2E2E] shadow-md rounded-xl px-3 py-2 text-sm max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
+          Tá com dúvida? Chama no Zap!
         </div>
       )}
 

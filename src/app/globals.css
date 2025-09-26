@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+  @apply bg-neutral-950 text-white;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
