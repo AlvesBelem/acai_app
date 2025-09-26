@@ -1,7 +1,7 @@
 // app/verificado/[status]/page.tsx
 
-export default async function VerificadoPage({ params }: { params: Promise<{ status: string }> }) {
-  const { status } = await params
+export default function VerificadoPage({ params }: { params: { status: string } }) {
+  const { status } = params
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
